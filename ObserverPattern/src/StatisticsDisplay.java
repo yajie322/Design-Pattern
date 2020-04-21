@@ -1,18 +1,21 @@
+import java.util.Observable;
+import java.util.Observer;
+
 public class StatisticsDisplay implements Observer, DisplayElement {
 
     private double maxTemp;
     private double minTemp;
     private double tempSum;
     private int tempCount;
-    private WeatherData weatherData;
+    private Observable observable;
 
-    public StatisticsDisplay(WeatherData weatherData) {
+    public StatisticsDisplay(Observable observable) {
         this.maxTemp = Integer.MIN_VALUE;
         this.minTemp = Integer.MAX_VALUE;
         this.tempCount = 0;
         this.tempSum = 0;
-        this.weatherData = weatherData;
-        this.weatherData.registerObserver(this);
+        this.observable = observable;
+        this.observable.addObserver(this);
     }
 
     @Override
@@ -21,12 +24,15 @@ public class StatisticsDisplay implements Observer, DisplayElement {
     }
 
     @Override
-    public void update(double temp, double humidity, double pressure) {
-        this.maxTemp = Math.max(this.maxTemp, temp);
-        this.minTemp = Math.min(this.minTemp, temp);
-        this.tempSum += temp;
-        this.tempCount++;
-        display();
+    public void update(Observable o, Object arg) {
+        if (o instanceof WeatherData) {
+            WeatherData weatherData = (WeatherData) o;
+            double temp = weatherData.getTemperature();
+            this.maxTemp = Math.max(this.maxTemp, temp);
+            this.minTemp = Math.min(this.minTemp, temp);
+            this.tempSum += temp;
+            this.tempCount++;
+            display();
+        }
     }
-
 }
